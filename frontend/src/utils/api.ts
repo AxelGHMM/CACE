@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Lee la baseURL desde las variables de entorno
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // Utiliza VITE_API_BASE_URL del entorno
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000", // Utiliza VITE_API_BASE_URL del entorno
 });
 
 api.interceptors.request.use((config) => {

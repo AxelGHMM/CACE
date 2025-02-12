@@ -1,0 +1,107 @@
+import React, { useEffect, useState } from "react";
+import api from "../../utils/api";
+import { useNavigate } from "react-router-dom";
+import { Box, Typography, Grid, Card, CardContent, Button } from "@mui/material";
+import { Bar, Pie } from "react-chartjs-2";
+
+const HomePage: React.FC = () => {
+  const [user, setUser] = useState<any>(null); // Estado para el usuario
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchHomepage = async () => {
+      try {
+        const response = await api.get("/homepage"); // Llama al backend para validar el token
+        console.log("Respuesta del backend:", response.data);
+        setUser(response.data.user); // Guarda la información del usuario
+      } catch (err) {
+        console.error("Error al cargar el homepage:", err);
+        navigate("/login"); // Redirige al login si no hay un token válido
+      }
+    };
+
+    fetchHomepage();
+  }, [navigate]);
+
+  // Datos para la gráfica de barras
+  const barData = {
+    labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
+    datasets: [
+      {
+        label: "Ventas",
+        data: [120, 190, 300, 500, 200],
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Datos para la gráfica de pastel
+  const pieData = {
+    labels: ["Producto A", "Producto B", "Producto C"],
+    datasets: [
+      {
+        data: [300, 500, 200],
+        backgroundColor: ["#ff6384", "#36a2eb", "#ffce56"],
+        hoverBackgroundColor: ["#ff6384", "#36a2eb", "#ffce56"],
+      },
+    ],
+  };
+
+  if (!user) {
+    return <p>Cargando...</p>; // Muestra un mensaje mientras verifica el token
+  }
+
+  return (
+    <Box sx={{ padding: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Bienvenido, {user.name}
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        Este es el homepage.
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Promedio de Calificaciones
+              </Typography>
+              <Bar data={barData} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Promedio de Asistencias
+              </Typography>
+              <Pie data={pieData} />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+      <Box sx={{ marginTop: 4, textAlign: "center" }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/page-a")}
+          sx={{ marginRight: 2 }}
+        >
+          Ir a Página A
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate("/page-b")}
+        >
+          Ir a Página B
+        </Button>
+      </Box>
+    </Box>
+  );
+};
+
+export default HomePage;

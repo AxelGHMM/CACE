@@ -17,5 +17,3 @@ dist/
 # Ignorar contenedores de Docker
 *.log
 .DS_Store
-
-schema.sql
