@@ -15,6 +15,9 @@ SET row_security = off;
 SET default_tablespace = '';
 SET default_table_access_method = heap;
 
+-- Establecer el esquema por defecto
+SET search_path TO public;
+
 -- Tabla de Users (Profesores y Admins)
 CREATE TABLE public.users (
     id SERIAL PRIMARY KEY,
@@ -24,7 +27,8 @@ CREATE TABLE public.users (
     role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'professor')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Students
@@ -36,7 +40,8 @@ CREATE TABLE public.students (
     group_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Groups
@@ -44,7 +49,8 @@ CREATE TABLE public.groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Subjects (Materias)
@@ -52,7 +58,8 @@ CREATE TABLE public.subjects (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Assignments (Relación entre users, groups y subjects)
@@ -61,7 +68,8 @@ CREATE TABLE public.assignments (
     user_id INTEGER NOT NULL REFERENCES public.users(id),
     group_id INTEGER NOT NULL REFERENCES public.groups(id),
     subject_id INTEGER NOT NULL REFERENCES public.subjects(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Attendances (Asistencias)
@@ -72,7 +80,9 @@ CREATE TABLE public.attendances (
     date DATE NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('present', 'absent', 'late')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de Grades (Calificaciones para cada parcial)
@@ -95,5 +105,51 @@ CREATE TABLE public.grades (
     partial3_exam NUMERIC(5, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
+
+-- Crear función update_timestamp()
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear triggers para actualizar updated_at automáticamente
+CREATE TRIGGER set_timestamp_users
+BEFORE UPDATE ON public.users
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_students
+BEFORE UPDATE ON public.students
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_groups
+BEFORE UPDATE ON public.groups
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_subjects
+BEFORE UPDATE ON public.subjects
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_assignments
+BEFORE UPDATE ON public.assignments
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_attendances
+BEFORE UPDATE ON public.attendances
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER set_timestamp_grades
+BEFORE UPDATE ON public.grades
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

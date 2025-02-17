@@ -1,7 +1,9 @@
+// src/pages/GradesPage.tsx
 import React, { useState } from "react";
 import {
   Box,
   Typography,
+  Grid,
   Button,
   Table,
   TableBody,
@@ -10,9 +12,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Grid,
-  List,
-  ListItemButton,
 } from "@mui/material";
 import DashboardLayout from "../Layout/DashboardLayout";
 
@@ -34,9 +33,26 @@ const GradesPage: React.FC = () => {
 
   const handleGrupoClick = (grupo: string) => {
     setGrupoSeleccionado(grupo);
+    // Aquí puedes cargar las calificaciones desde tu API
     setCalificaciones([
-      { matricula: "001", nombre: "Juan Pérez", primerParcial: 80, medioTermino: 85, segundoParcial: 90, examenGlobal: 95, pia: 92 },
-      { matricula: "002", nombre: "María López", primerParcial: 75, medioTermino: 80, segundoParcial: 85, examenGlobal: 88, pia: 90 },
+      {
+        matricula: "001",
+        nombre: "Juan Pérez",
+        primerParcial: 80,
+        medioTermino: 85,
+        segundoParcial: 90,
+        examenGlobal: 95,
+        pia: 92,
+      },
+      {
+        matricula: "002",
+        nombre: "María López",
+        primerParcial: 75,
+        medioTermino: 80,
+        segundoParcial: 85,
+        examenGlobal: 88,
+        pia: 90,
+      },
     ]);
   };
 
@@ -47,37 +63,40 @@ const GradesPage: React.FC = () => {
 
   const handleGuardar = () => {
     alert("Calificaciones guardadas correctamente.");
+    // Aquí podrías hacer una petición para guardar las calificaciones
   };
 
   return (
     <DashboardLayout>
-      <Box sx={{ bgcolor: "#1E1E1E", color: "white", p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Gestión de Calificaciones
-        </Typography>
+      <Box sx={{ bgcolor: "#121212", minHeight: "100vh", color: "#fff", p: 3 }}>
         {!grupoSeleccionado ? (
-          <Grid container spacing={2} justifyContent="center">
+          <Box>
             <Typography variant="h5" align="center" gutterBottom>
               Selecciona un Grupo
             </Typography>
-            {grupos.map((grupo) => (
-              <Grid item key={grupo}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleGrupoClick(grupo)}
-                  sx={{ backgroundColor: "#37007d", "&:hover": { backgroundColor: "#4b0082" } }}
-                >
-                  {grupo}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
+            <Grid container spacing={2} justifyContent="center">
+              {grupos.map((grupo) => (
+                <Grid item key={grupo}>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleGrupoClick(grupo)}
+                    sx={{
+                      backgroundColor: "#37007d",
+                      "&:hover": { backgroundColor: "#4b0082" },
+                    }}
+                  >
+                    {grupo}
+                  </Button>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         ) : (
           <>
             <Typography variant="h5" align="center" gutterBottom>
               Calificaciones del {grupoSeleccionado}
             </Typography>
-            <TableContainer component={Paper} sx={{ backgroundColor: "#1e1e1e", mt: 3 }}>
+            <TableContainer component={Paper} sx={{ backgroundColor: "#1e1e1e" }}>
               <Table>
                 <TableHead>
                   <TableRow>
