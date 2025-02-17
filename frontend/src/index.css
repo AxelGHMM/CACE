@@ -1,3 +1,4 @@
+/* 🔹 Este es el archivo de estilos principal de la aplicación */
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,28 +14,72 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 🔹 Asegurar que todo ocupe el 100% de la pantalla */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #242424; /* Restaurando fondo oscuro */
+  color: rgba(255, 255, 255, 0.87); /* Restaurando color de texto */
+  height: 100%;
+  overflow-y: auto;
+}
+
+#root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔹 Ajustar el contenedor principal */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  min-height: 100vh;
+  overflow: hidden; /* Evita scroll innecesario */
+}
+
+/* 🔹 Ajustar DashELayout para ocupar toda la pantalla */
+/*.dash-e-layout {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  min-height: 100vh; /* Color de fondo para DashELayout 
+} */
+
+/* 🔹 Ajustar el contenido de la página */
+.page-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: #1E1E1E; /* Color de fondo del contenido */
+  color: #ffffff; /* Restaurando color de texto */
+}
+
+/* 🔹 Estilos para enlaces */
 a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
+/* 🔹 Ajustes generales */
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
 
+/* 🔹 Estilos para botones */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -42,27 +87,39 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #800080; /* Restaurando color del botón */
   cursor: pointer;
   transition: border-color 0.25s;
+  color: white;
 }
+
 button:hover {
-  border-color: #646cff;
+  border-color: #4b0082; /* Color al hacer hover */
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* 🔹 Estilos responsivos para modo claro */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
 }
+/* 🔹 Elimina padding general pero mantiene solo el padding-left */
+.css-4az356 {
+  padding: 0 !important;  /* Elimina todo el padding */
+  padding-left: 24px !important; /* Mantiene solo padding a la izquierda */
+}
+

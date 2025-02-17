@@ -31,20 +31,20 @@ CREATE TABLE public.users (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Students
+-- Tabla de Students (Alumnos)
 CREATE TABLE public.students (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100),
     matricula VARCHAR(50) NOT NULL UNIQUE,
-    group_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL REFERENCES public.groups(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Groups
+-- Tabla de Groups (Grupos)
 CREATE TABLE public.groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -62,7 +62,7 @@ CREATE TABLE public.subjects (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Assignments (Relación entre users, groups y subjects)
+-- Tabla de Assignments (Relación entre Users, Groups y Subjects)
 CREATE TABLE public.assignments (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES public.users(id),
@@ -75,8 +75,8 @@ CREATE TABLE public.assignments (
 -- Tabla de Attendances (Asistencias)
 CREATE TABLE public.attendances (
     id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES public.students(id),
-    user_id INTEGER NOT NULL REFERENCES public.users(id),
+    student_id INTEGER NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     date DATE NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('present', 'absent', 'late')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -85,28 +85,21 @@ CREATE TABLE public.attendances (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Grades (Calificaciones para cada parcial)
+-- Tabla de Grades (Calificaciones)
 CREATE TABLE public.grades (
     id SERIAL PRIMARY KEY,
     student_id INTEGER NOT NULL REFERENCES public.students(id),
+    professor_id INTEGER NOT NULL REFERENCES public.users(id),
     subject_id INTEGER NOT NULL REFERENCES public.subjects(id),
-    user_id INTEGER NOT NULL REFERENCES public.users(id),
-    partial1_attendance NUMERIC(5, 2),
-    partial1_activities NUMERIC(5, 2),
-    partial1_project NUMERIC(5, 2),
-    partial1_exam NUMERIC(5, 2),
-    partial2_attendance NUMERIC(5, 2),
-    partial2_activities NUMERIC(5, 2),
-    partial2_project NUMERIC(5, 2),
-    partial2_exam NUMERIC(5, 2),
-    partial3_attendance NUMERIC(5, 2),
-    partial3_activities NUMERIC(5, 2),
-    partial3_project NUMERIC(5, 2),
-    partial3_exam NUMERIC(5, 2),
+    partial INTEGER NOT NULL CHECK (partial BETWEEN 1 AND 3),
+    activity_1 NUMERIC(5,2),
+    activity_2 NUMERIC(5,2),
+    attendance NUMERIC(5,2),
+    project NUMERIC(5,2),
+    exam NUMERIC(5,2),
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Crear función update_timestamp()

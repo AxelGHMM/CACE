@@ -1,143 +1,206 @@
-// src/pages/GradesPage.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Typography,
-  Grid,
   Button,
+  Typography,
+  Box,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Paper,
+  TextField,
+  Snackbar,
+  Alert, // 🔹 Importar Alert para usar en el Snackbar
 } from "@mui/material";
+import api from "../../utils/api";
 import DashboardLayout from "../Layout/DashboardLayout";
-
-interface Calificacion {
-  matricula: string;
-  nombre: string;
-  primerParcial: number;
-  medioTermino: number;
-  segundoParcial: number;
-  examenGlobal: number;
-  pia: number;
-}
+import { useAuth } from "../../hooks/useAuth";
 
 const GradesPage: React.FC = () => {
-  const [grupoSeleccionado, setGrupoSeleccionado] = useState<string | null>(null);
-  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([]);
+  const { user } = useAuth();
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [partials] = useState<number[]>([1, 2, 3]);
+  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
+  const [selectedPartial, setSelectedPartial] = useState<number | null>(null);
+  const [grades, setGrades] = useState<any[]>([]);
+  const [editedGrades, setEditedGrades] = useState<Record<number, any>>({});
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  const grupos = ["Grupo A", "Grupo B", "Grupo C"];
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await api.get(`/assignments/user/${user.id}`);
+        setAssignments(response.data);
+        const uniqueGroups = response.data.reduce((acc: any[], curr) => {
+          if (!acc.find((g) => g.id === curr.group_id)) {
+            acc.push({ id: curr.group_id, name: curr.group_name });
+          }
+          return acc;
+        }, []);
+        setGroups(uniqueGroups);
+        setSubjects([]);
+      } catch (error) {
+        console.error("Error al obtener asignaciones:", error);
+      }
+    };
 
-  const handleGrupoClick = (grupo: string) => {
-    setGrupoSeleccionado(grupo);
-    // Aquí puedes cargar las calificaciones desde tu API
-    setCalificaciones([
-      {
-        matricula: "001",
-        nombre: "Juan Pérez",
-        primerParcial: 80,
-        medioTermino: 85,
-        segundoParcial: 90,
-        examenGlobal: 95,
-        pia: 92,
-      },
-      {
-        matricula: "002",
-        nombre: "María López",
-        primerParcial: 75,
-        medioTermino: 80,
-        segundoParcial: 85,
-        examenGlobal: 88,
-        pia: 90,
-      },
-    ]);
+    fetchAssignments();
+  }, [user]);
+
+  useEffect(() => {
+    if (!selectedGroup) return;
+    const relatedSubjects = assignments
+      .filter((a) => a.group_id === selectedGroup)
+      .map((a) => ({ id: a.subject_id, name: a.subject_name }));
+    setSubjects(relatedSubjects);
+    setSelectedSubject(null);
+  }, [selectedGroup, assignments]);
+
+  const fetchGrades = async () => {
+    if (!selectedGroup || !selectedSubject || !selectedPartial) return;
+    try {
+      const response = await api.get(
+        `/grade/group/${selectedGroup}/subject/${selectedSubject}/${selectedPartial}`
+      );
+      const sortedGrades = response.data.sort((a: any, b: any) => a.matricula.localeCompare(b.matricula));
+      setGrades(sortedGrades);
+    } catch (error) {
+      console.error("Error al obtener calificaciones:", error);
+    }
   };
 
-  const handleRegresar = () => {
-    setGrupoSeleccionado(null);
-    setCalificaciones([]);
+  useEffect(() => {
+    fetchGrades();
+  }, [selectedGroup, selectedSubject, selectedPartial]);
+
+  const handleChange = (id: number, field: string, value: string) => {
+    setEditedGrades((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], [field]: value },
+    }));
   };
 
-  const handleGuardar = () => {
-    alert("Calificaciones guardadas correctamente.");
-    // Aquí podrías hacer una petición para guardar las calificaciones
+  const handleSave = async (id: number) => {
+    try {
+      await api.put(`/grade/${id}`, editedGrades[id]);
+
+      setSnackbar({ open: true, message: "Calificación guardada con éxito", severity: "success" });
+
+      setEditedGrades({});
+      fetchGrades();
+    } catch (error) {
+      console.error("Error al actualizar calificación:", error);
+      setSnackbar({ open: true, message: "Error al guardar la calificación", severity: "error" });
+    }
   };
 
   return (
     <DashboardLayout>
-      <Box sx={{ bgcolor: "#121212", minHeight: "100vh", color: "#fff", p: 3 }}>
-        {!grupoSeleccionado ? (
-          <Box>
-            <Typography variant="h5" align="center" gutterBottom>
-              Selecciona un Grupo
-            </Typography>
-            <Grid container spacing={2} justifyContent="center">
-              {grupos.map((grupo) => (
-                <Grid item key={grupo}>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleGrupoClick(grupo)}
-                    sx={{
-                      backgroundColor: "#37007d",
-                      "&:hover": { backgroundColor: "#4b0082" },
-                    }}
-                  >
-                    {grupo}
-                  </Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        ) : (
-          <>
-            <Typography variant="h5" align="center" gutterBottom>
-              Calificaciones del {grupoSeleccionado}
-            </Typography>
-            <TableContainer component={Paper} sx={{ backgroundColor: "#1e1e1e" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Matrícula</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Nombre</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Primer Parcial</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Medio Término</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Segundo Parcial</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>Examen Global</TableCell>
-                    <TableCell sx={{ color: "#fff", backgroundColor: "#37007d" }}>PIA</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {calificaciones.map((calificacion) => (
-                    <TableRow key={calificacion.matricula}>
-                      <TableCell>{calificacion.matricula}</TableCell>
-                      <TableCell>{calificacion.nombre}</TableCell>
-                      <TableCell>{calificacion.primerParcial}</TableCell>
-                      <TableCell>{calificacion.medioTermino}</TableCell>
-                      <TableCell>{calificacion.segundoParcial}</TableCell>
-                      <TableCell>{calificacion.examenGlobal}</TableCell>
-                      <TableCell>{calificacion.pia}</TableCell>
-                    </TableRow>
+      <Box sx={{ p: 4, bgcolor: "#121212", color: "white", minHeight: "100vh" }}>
+        <Typography variant="h4" gutterBottom>Gestión de Calificaciones</Typography>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Grupo</InputLabel>
+          <Select
+            value={selectedGroup ?? ""}
+            onChange={(e) => setSelectedGroup(Number(e.target.value))}
+            sx={{ bgcolor: "#282828", color: "white" }}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Materia</InputLabel>
+          <Select
+            value={selectedSubject ?? ""}
+            onChange={(e) => setSelectedSubject(Number(e.target.value))}
+            sx={{ bgcolor: "#282828", color: "white" }}
+          >
+            {subjects.map((subject) => (
+              <MenuItem key={subject.id} value={subject.id}>
+                {subject.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Parcial</InputLabel>
+          <Select
+            value={selectedPartial ?? ""}
+            onChange={(e) => setSelectedPartial(Number(e.target.value))}
+            sx={{ bgcolor: "#282828", color: "white" }}
+          >
+            {partials.map((partial) => (
+              <MenuItem key={partial} value={partial}>
+                Parcial {partial}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Box component={Paper} sx={{ mt: 3, maxHeight: 400, overflow: "auto", bgcolor: "#1E1E1E", p: 2 }}>
+          <Typography variant="h6" color="white">Lista de Calificaciones</Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ color: "white" }}>Matrícula</TableCell>
+                <TableCell sx={{ color: "white" }}>Nombre</TableCell>
+                <TableCell sx={{ color: "white" }}>Actividad 1</TableCell>
+                <TableCell sx={{ color: "white" }}>Actividad 2</TableCell>
+                <TableCell sx={{ color: "white" }}>Asistencia</TableCell>
+                <TableCell sx={{ color: "white" }}>Proyecto</TableCell>
+                <TableCell sx={{ color: "white" }}>Examen</TableCell>
+                <TableCell sx={{ color: "white" }}>Acción</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {grades.map((grade) => (
+                <TableRow key={grade.id}>
+                  <TableCell sx={{ color: "white" }}>{grade.matricula}</TableCell>
+                  <TableCell sx={{ color: "white" }}>{grade.name}</TableCell>
+                  {["activity_1", "activity_2", "attendance", "project", "exam"].map((field) => (
+                    <TableCell key={field}>
+                      <TextField
+                        value={editedGrades[grade.id]?.[field] ?? grade[field]}
+                        onChange={(e) => handleChange(grade.id, field, e.target.value)}
+                        sx={{ input: { color: "white" }, bgcolor: "#282828" }}
+                      />
+                    </TableCell>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item>
-                <Button variant="contained" onClick={handleRegresar} sx={{ backgroundColor: "#4b0082" }}>
-                  Regresar
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button variant="contained" onClick={handleGuardar} sx={{ backgroundColor: "#4caf50" }}>
-                  Guardar Calificaciones
-                </Button>
-              </Grid>
-            </Grid>
-          </>
-        )}
+                  <TableCell>
+                    <Button variant="contained" onClick={() => handleSave(grade.id)} sx={{ bgcolor: "#800080" }}>
+                      Guardar
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+
+        {/* 🔹 Snackbar para mostrar alertas */}
+        <Snackbar open={snackbar.open} autoHideDuration={2000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+        </Snackbar>
       </Box>
     </DashboardLayout>
   );

@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 declare global {
   namespace Express {
     interface Request {
-      user?: string | JwtPayload; // Agregar la propiedad `user` al tipo Request
+      user?: JwtPayload & { id: number; role?: string };  // El tipo ahora incluye `id`
     }
   }
 }

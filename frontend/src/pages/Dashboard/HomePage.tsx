@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Grid, Card, CardContent, CircularProgress, Button } from "@mui/material";
+import { Typography, Grid, Card, CardContent, CircularProgress, Box } from "@mui/material";
 import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -19,12 +19,22 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 const HomePage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [attendanceData, setAttendanceData] = useState<number[]>([]);
+  const [gradesData, setGradesData] = useState<number[]>([]);
+  const [totalAttendance, setTotalAttendance] = useState(0);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [attendanceAverage, setAttendanceAverage] = useState("0%");
 
   useEffect(() => {
     const fetchHomepage = async () => {
       try {
-        const response = await api.get("/homepage");
+        const response = await api.get("/users/homepage/stats");
         setUser(response.data.user);
+        setAttendanceData(response.data.attendanceData || [0, 0, 0, 0, 0]);
+        setGradesData(response.data.gradesData || [0, 0, 0]);
+        setTotalAttendance(response.data.totalAttendance || 0);
+        setTotalStudents(response.data.totalStudents || 0);
+        setAttendanceAverage(response.data.attendanceAverage || "0%");
       } catch (err) {
         console.error("Error al cargar el homepage:", err);
       } finally {
@@ -39,17 +49,17 @@ const HomePage: React.FC = () => {
     datasets: [
       {
         label: "Asistencias",
-        data: [100, 250, 400, 550, 300],
+        data: attendanceData,
         backgroundColor: "#800080",
       },
     ],
   };
 
   const pieData = {
-    labels: ["1 Grado", "2 Grado", "3 Grado"],
+    labels: ["1° Grado", "2° Grado", "3° Grado"],
     datasets: [
       {
-        data: [300, 500, 200],
+        data: gradesData,
         backgroundColor: ["#800080", "#9932CC", "#BA55D3"],
       },
     ],
@@ -58,53 +68,65 @@ const HomePage: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <CircularProgress color="secondary" />
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress color="secondary" />
+        </Box>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <Typography variant="h4">¡Bienvenido a CACE!</Typography>
-      <Typography variant="body1" gutterBottom>Tu sesión ha sido confirmada con éxito.</Typography>
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: "#222", color: "white", textAlign: "center", p: 2 }}>
-            <Typography variant="h6">Total de Asistencias</Typography>
-            <Typography variant="h4">1250</Typography>
-          </Card>
+      <Box sx={{ p: 4, bgcolor: "#121212", color: "white", minHeight: "100vh" }}>
+        <Typography variant="h4" gutterBottom>¡Bienvenido a CACE!</Typography>
+        <Typography variant="body1" gutterBottom>Tu sesión ha sido confirmada con éxito.</Typography>
+
+        {/* 🔹 Tarjetas Resumen */}
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: "#1E1E1E", color: "white", textAlign: "center", p: 2 }}>
+              <Typography variant="h6">Total de Asistencias</Typography>
+              <Typography variant="h4">{totalAttendance}</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: "#1E1E1E", color: "white", textAlign: "center", p: 2 }}>
+              <Typography variant="h6">Estudiantes Registrados</Typography>
+              <Typography variant="h4">{totalStudents}</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: "#1E1E1E", color: "white", textAlign: "center", p: 2 }}>
+              <Typography variant="h6">Promedio de Asistencias</Typography>
+              <Typography variant="h4">{attendanceAverage}</Typography>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: "#222", color: "white", textAlign: "center", p: 2 }}>
-            <Typography variant="h6">Estudiantes Registrados</Typography>
-            <Typography variant="h4">450</Typography>
-          </Card>
+
+        {/* 🔹 Gráficos */}
+        <Grid container spacing={3} sx={{ mt: 2, flexGrow: 1 }}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ bgcolor: "#1E1E1E", color: "white", height: "100%" }}>
+              <CardContent>
+                <Typography variant="h6">Asistencias de los últimos meses</Typography>
+                <Box sx={{ width: "100%", height: 300 }}>
+                  <Bar data={barData} options={{ maintainAspectRatio: false }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ bgcolor: "#1E1E1E", color: "white", height: "100%" }}>
+              <CardContent>
+                <Typography variant="h6">Asistencias por Grados</Typography>
+                <Box sx={{ width: "100%", height: 300 }}>
+                  <Pie data={pieData} options={{ maintainAspectRatio: false }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: "#222", color: "white", textAlign: "center", p: 2 }}>
-            <Typography variant="h6">Promedio de Asistencias</Typography>
-            <Typography variant="h4">87%</Typography>
-          </Card>
-        </Grid>
-      </Grid>
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ bgcolor: "#222", color: "white" }}>
-            <CardContent>
-              <Typography variant="h6">Asistencias de los últimos meses</Typography>
-              <Bar data={barData} />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ bgcolor: "#222", color: "white" }}>
-            <CardContent>
-              <Typography variant="h6">Asistencias por Grados</Typography>
-              <Pie data={pieData} />
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </Box>
     </DashboardLayout>
   );
 };

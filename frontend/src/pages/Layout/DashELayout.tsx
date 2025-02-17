@@ -4,19 +4,26 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import MenuIcon from "@mui/icons-material/Menu";
 
-const sidebarItems = [
-  { label: "Inicio", route: "/dashboard" },
-  { label: "Calificaciones", route: "/dashboard/grades" },
-  { label: "Asistencia", route: "/dashboard/attendance" },
+const adminSidebarItems = [
+  { label: "Inicio", route: "/dashE" },
+  { label: "Usuarios", route: "/dashE/users" },
+  { label: "Estudiantes", route: "/dashE/students" },
+  { label: "Materias y Grupos", route: "/dashE/subjects-groups" },
 ];
 
-const drawerWidth = 250; // Ancho fijo del sidebar
+const drawerWidth = 250; // Ancho del sidebar
 
-const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Si el usuario no es admin, redirigir al inicio
+  if (!user || user.role !== "admin") {
+    navigate("/");
+    return null;
+  }
 
   const isActiveTab = (route: string) => location.pathname === route;
 
@@ -26,20 +33,20 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   const drawerContent = (
     <Box
-      sx={{
-        width: drawerWidth,
-        bgcolor: "black",
-        p: 2,
-        height: "95%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+          sx={{
+            width: drawerWidth,
+            bgcolor: "black",
+            p: 2,
+            height: "95%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
       <Typography variant="h5" gutterBottom>
-        Bienvenido, {user?.name || "Usuario"}
+        Admin: {user?.name || "Usuario"}
       </Typography>
       <List sx={{ flexGrow: 1 }}>
-        {sidebarItems.map(({ label, route }) => (
+        {adminSidebarItems.map(({ label, route }) => (
           <ListItem key={label} disablePadding>
             <ListItemButton
               onClick={() => navigate(route)}
@@ -76,7 +83,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
           flexShrink: 0,
           position: "fixed",
           height: "100vh",
-          zIndex: 1200, // Asegura que no quede por debajo del contenido
+          zIndex: 1200,
           display: { xs: "none", md: "block" },
         }}
       >
@@ -119,4 +126,4 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   );
 };
 
-export default DashboardLayout;
+export default DashELayout;
