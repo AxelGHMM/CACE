@@ -18,11 +18,12 @@ import api from "../../utils/api";
 import * as XLSX from "xlsx";
 import DashELayout from "../Layout/DashELayout";
 import useAdminAuth from "../../hooks/useAdminAuth";
+import theme from "../../theme";
 
 const StudentsPage: React.FC = () => {
-  const isAdmin = useAdminAuth(); // 🔹 Protege la página para admins
+  const isAdmin = useAdminAuth();
 
-  if (!isAdmin) return null; // 🔹 Evita renderizar si no es admin
+  if (!isAdmin) return null;
 
   const [professors, setProfessors] = useState<any[]>([]);
   const [selectedProfessor, setSelectedProfessor] = useState<number | null>(null);
@@ -34,7 +35,6 @@ const StudentsPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any[]>([]);
 
-  // Obtener profesores, grupos y materias
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -114,137 +114,114 @@ const StudentsPage: React.FC = () => {
 
   return (
     <DashELayout>
-    <Box sx={{ p: 4, bgcolor: "#121212", color: "#ffffff", minHeight: "100vh", overflowY: "auto" }}>
-    <Typography variant="h4" gutterBottom>Gestión de Profesores y Estudiantes</Typography>
-  
-      {/* Asignar Profesor a Grupo y Materia */}
-      <Typography variant="h6" sx={{ mt: 3 }}>Asignar Profesor a Grupo y Materia</Typography>
-  
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel sx={{ color: "white" }}>Profesor</InputLabel>
-        <Select
-          value={selectedProfessor ?? ""}
-          onChange={(e) => setSelectedProfessor(Number(e.target.value))}
-          sx={{
-            bgcolor: "#282828", // 🔹 Fondo oscuro
-            color: "white", // 🔹 Texto blanco
-          }}
-          MenuProps={{
-            PaperProps: { sx: { bgcolor: "#282828", color: "white" } }, // 🔹 Menú desplegable oscuro
-          }}
-        >
-          {professors.map((professor) => (
-            <MenuItem key={professor.id} value={professor.id}>
-              {professor.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-  
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel sx={{ color: "white" }}>Grupo</InputLabel>
-        <Select
-          value={selectedGroupForAssignment ?? ""}
-          onChange={(e) => setSelectedGroupForAssignment(Number(e.target.value))}
-          sx={{
-            bgcolor: "#282828",
-            color: "white",
-          }}
-          MenuProps={{
-            PaperProps: { sx: { bgcolor: "#282828", color: "white" } },
-          }}
-        >
-          {groups.map((group) => (
-            <MenuItem key={group.id} value={group.id}>
-              {group.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-  
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel sx={{ color: "white" }}>Materia</InputLabel>
-        <Select
-          value={selectedSubject ?? ""}
-          onChange={(e) => setSelectedSubject(Number(e.target.value))}
-          sx={{
-            bgcolor: "#282828",
-            color: "white",
-          }}
-          MenuProps={{
-            PaperProps: { sx: { bgcolor: "#282828", color: "white" } },
-          }}
-        >
-          {subjects.map((subject) => (
-            <MenuItem key={subject.id} value={subject.id}>
-              {subject.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-  
-      <Button variant="contained" sx={{ mt: 2, bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }} onClick={handleAssign}>
-        Asignar Materia y Grupo
-      </Button>
-  
-      {/* Subir Lista de Alumnos */}
-      <Typography variant="h6" sx={{ mt: 4 }}>Subir Lista de Alumnos</Typography>
-  
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel sx={{ color: "white" }}>Grupo para Subida</InputLabel>
-        <Select
-          value={selectedGroupForUpload ?? ""}
-          onChange={(e) => setSelectedGroupForUpload(Number(e.target.value))}
-          sx={{
-            bgcolor: "#282828",
-            color: "white",
-          }}
-          MenuProps={{
-            PaperProps: { sx: { bgcolor: "#282828", color: "white" } },
-          }}
-        >
-          {groups.map((group) => (
-            <MenuItem key={group.id} value={group.id}>
-              {group.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-  
-      <Box sx={{ mt: 2 }}>
-        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} style={{ color: "white" }} />
-      </Box>
-  
-      {previewData.length > 0 && (
-        <Box component={Paper} sx={{ mt: 4, p: 2, maxHeight: 300, overflowY: "auto", bgcolor: "#1E1E1E" }}>
-          <Typography variant="h6">Vista Previa de la Lista</Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ color: "white" }}>Matrícula</TableCell>
-                <TableCell sx={{ color: "white" }}>Nombre</TableCell>
-                <TableCell sx={{ color: "white" }}>Email</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {previewData.map((student, index) => (
-                <TableRow key={index}>
-                  <TableCell sx={{ color: "white" }}>{student.matricula}</TableCell>
-                  <TableCell sx={{ color: "white" }}>{student.name}</TableCell>
-                  <TableCell sx={{ color: "white" }}>{student.email || "N/A"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <Box sx={{ p: 4, bgcolor: theme.colors.background, color: theme.colors.text, minHeight: "100vh" }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold" color={theme.colors.primary}>
+          Gestión de Profesores y Estudiantes
+        </Typography>
+
+        {/* Asignar Profesor a Grupo y Materia */}
+        <Typography variant="h6" sx={{ mt: 3 }} color={theme.colors.primary}>
+          Asignar Profesor a Grupo y Materia
+        </Typography>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: theme.colors.text }}>Profesor</InputLabel>
+          <Select
+            value={selectedProfessor ?? ""}
+            onChange={(e) => setSelectedProfessor(Number(e.target.value))}
+            sx={{
+              bgcolor: theme.colors.card,
+              color: theme.colors.text,
+            }}
+          >
+            {professors.map((professor) => (
+              <MenuItem key={professor.id} value={professor.id}>
+                {professor.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: theme.colors.text }}>Grupo</InputLabel>
+          <Select
+            value={selectedGroupForAssignment ?? ""}
+            onChange={(e) => setSelectedGroupForAssignment(Number(e.target.value))}
+            sx={{
+              bgcolor: theme.colors.card,
+              color: theme.colors.text,
+            }}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Button variant="contained" sx={{ mt: 2, bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }} onClick={handleAssign}>
+          Asignar Materia y Grupo
+        </Button>
+
+        {/* Subir Lista de Alumnos */}
+        <Typography variant="h6" sx={{ mt: 4 }} color={theme.colors.primary}>
+          Subir Lista de Alumnos
+        </Typography>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel sx={{ color: theme.colors.text }}>Grupo para Subida</InputLabel>
+          <Select
+            value={selectedGroupForUpload ?? ""}
+            onChange={(e) => setSelectedGroupForUpload(Number(e.target.value))}
+            sx={{
+              bgcolor: theme.colors.card,
+              color: theme.colors.text,
+            }}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Box sx={{ mt: 2 }}>
+          <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} style={{ color: theme.colors.text }} />
         </Box>
-      )}
-  
-      <Button variant="contained" sx={{ mt: 2, bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }} onClick={handleUpload} disabled={!file}>
-        Subir Archivo
-      </Button>
-    </Box>
-  </DashELayout>
-  
+
+        {previewData.length > 0 && (
+          <Box component={Paper} sx={{ mt: 4, p: 2, maxHeight: 300, overflowY: "auto", bgcolor: theme.colors.card }}>
+            <Typography variant="h6" color={theme.colors.primary}>
+              Vista Previa de la Lista
+            </Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ color: theme.colors.text }}>Matrícula</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>Nombre</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>Email</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {previewData.map((student, index) => (
+                  <TableRow key={index}>
+                    <TableCell sx={{ color: theme.colors.text }}>{student.matricula}</TableCell>
+                    <TableCell sx={{ color: theme.colors.text }}>{student.name}</TableCell>
+                    <TableCell sx={{ color: theme.colors.text }}>{student.email || "N/A"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+
+        <Button variant="contained" sx={{ mt: 2, bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }} onClick={handleUpload} disabled={!file}>
+          Subir Archivo
+        </Button>
+      </Box>
+    </DashELayout>
   );
 };
 

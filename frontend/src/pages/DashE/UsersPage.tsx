@@ -1,9 +1,31 @@
 import { useState, useEffect } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Box } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Typography,
+  Box,
+} from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import api from "../../utils/api";
 import DashELayout from "../Layout/DashELayout";
 import useAdminAuth from "../../hooks/useAdminAuth";
+import theme from "../../theme";
 
 const UsersPage = () => {
   const isAdmin = useAdminAuth();
@@ -51,7 +73,7 @@ const UsersPage = () => {
       const { id, ...data } = formData;
 
       if (editMode) {
-        delete data.password; // No enviar password en edición
+        delete data.password;
         await api.put(`/users/${id}`, data, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -83,33 +105,37 @@ const UsersPage = () => {
 
   return (
     <DashELayout>
-      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minHeight: "100vh", p: 4, bgcolor: "#121212", color: "#ffffff" }}>
-  <Typography variant="h4" gutterBottom>Gestión de Usuarios</Typography>
-        <Button 
-          variant="contained" 
-          sx={{ bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }} 
+      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minHeight: "100vh", p: 4, bgcolor: theme.colors.background, color: theme.colors.text }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold" color={theme.colors.primary}>
+          Gestión de Usuarios
+        </Typography>
+
+        <Button
+          variant="contained"
+          sx={{ bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }}
           onClick={() => handleOpen()}
         >
           Crear Usuario
         </Button>
-        <TableContainer component={Paper} sx={{ mt: 2, bgcolor: "#1E1E1E", flexGrow: 1 }}>
+
+        <TableContainer component={Paper} sx={{ mt: 2, bgcolor: theme.colors.card, flexGrow: 1, borderRadius: "10px" }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: "#ffffff" }}>Nombre</TableCell>
-                <TableCell sx={{ color: "#ffffff" }}>Email</TableCell>
-                <TableCell sx={{ color: "#ffffff" }}>Rol</TableCell>
-                <TableCell sx={{ color: "#ffffff" }}>Acciones</TableCell>
+                <TableCell sx={{ color: theme.colors.text }}>Nombre</TableCell>
+                <TableCell sx={{ color: theme.colors.text }}>Email</TableCell>
+                <TableCell sx={{ color: theme.colors.text }}>Rol</TableCell>
+                <TableCell sx={{ color: theme.colors.text }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell sx={{ color: "#ffffff" }}>{user.name}</TableCell>
-                  <TableCell sx={{ color: "#ffffff" }}>{user.email}</TableCell>
-                  <TableCell sx={{ color: "#ffffff" }}>{user.role}</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>{user.name}</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>{user.email}</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>{user.role}</TableCell>
                   <TableCell>
-                    <IconButton color="primary" onClick={() => handleOpen(user)}>
+                    <IconButton sx={{ color: theme.colors.primary }} onClick={() => handleOpen(user)}>
                       <Edit />
                     </IconButton>
                     <IconButton sx={{ color: "#ff1744" }} onClick={() => handleDelete(user.id)}>
@@ -123,29 +149,59 @@ const UsersPage = () => {
         </TableContainer>
       </Box>
 
-      <Dialog open={open} onClose={handleClose} PaperProps={{ sx: { bgcolor: "#1E1E1E", color: "#ffffff" } }}>
+      <Dialog open={open} onClose={handleClose} PaperProps={{ sx: { bgcolor: theme.colors.card, color: theme.colors.text } }}>
         <DialogTitle>{editMode ? "Editar Usuario" : "Crear Usuario"}</DialogTitle>
         <DialogContent>
-          <TextField fullWidth margin="dense" name="name" label="Nombre" value={formData.name} onChange={handleChange} InputLabelProps={{ style: { color: "#ffffff" } }} sx={{ input: { color: "#ffffff" } }} />
-          <TextField fullWidth margin="dense" name="email" label="Email" value={formData.email} onChange={handleChange} InputLabelProps={{ style: { color: "#ffffff" } }} sx={{ input: { color: "#ffffff" } }} />
-          
+          <TextField
+            fullWidth
+            margin="dense"
+            name="name"
+            label="Nombre"
+            value={formData.name}
+            onChange={handleChange}
+            InputLabelProps={{ style: { color: theme.colors.text } }}
+            sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            name="email"
+            label="Email"
+            value={formData.email}
+            onChange={handleChange}
+            InputLabelProps={{ style: { color: theme.colors.text } }}
+            sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
+          />
+
           <FormControl fullWidth margin="dense">
-            <InputLabel sx={{ color: "#ffffff" }}>Rol</InputLabel>
-            <Select name="role" value={formData.role} onChange={handleChange} sx={{ color: "#ffffff" }}>
+            <InputLabel sx={{ color: theme.colors.text }}>Rol</InputLabel>
+            <Select name="role" value={formData.role} onChange={handleChange} sx={{ color: theme.colors.text, bgcolor: theme.colors.background }}>
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="professor">Professor</MenuItem>
             </Select>
           </FormControl>
 
           {!editMode && (
-            <TextField fullWidth margin="dense" name="password" label="Contraseña" type="password" value={formData.password} onChange={handleChange} InputLabelProps={{ style: { color: "#ffffff" } }} sx={{ input: { color: "#ffffff" } }} />
+            <TextField
+              fullWidth
+              margin="dense"
+              name="password"
+              label="Contraseña"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              InputLabelProps={{ style: { color: theme.colors.text } }}
+              sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
+            />
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} sx={{ color: "#ffffff" }}>Cancelar</Button>
-          <Button 
-            variant="contained" 
-            sx={{ bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }} 
+          <Button onClick={handleClose} sx={{ color: theme.colors.text }}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }}
             onClick={handleSubmit}
           >
             {editMode ? "Guardar Cambios" : "Crear"}

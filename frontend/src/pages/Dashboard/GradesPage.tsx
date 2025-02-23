@@ -15,11 +15,12 @@ import {
   Paper,
   TextField,
   Snackbar,
-  Alert, // 🔹 Importar Alert para usar en el Snackbar
+  Alert,
 } from "@mui/material";
 import api from "../../utils/api";
 import DashboardLayout from "../Layout/DashboardLayout";
 import { useAuth } from "../../hooks/useAuth";
+import theme from "../../theme"; // 🔹 Importar el tema
 
 const GradesPage: React.FC = () => {
   const { user } = useAuth();
@@ -44,7 +45,7 @@ const GradesPage: React.FC = () => {
       try {
         const response = await api.get(`/assignments/user/${user.id}`);
         setAssignments(response.data);
-        const uniqueGroups = response.data.reduce((acc: any[], curr) => {
+        const uniqueGroups = response.data.reduce((acc: any[], curr: { group_id: number; group_name: string }) => {
           if (!acc.find((g) => g.id === curr.group_id)) {
             acc.push({ id: curr.group_id, name: curr.group_name });
           }
@@ -109,15 +110,17 @@ const GradesPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <Box sx={{ p: 4, bgcolor: "#121212", color: "white", minHeight: "100vh" }}>
-        <Typography variant="h4" gutterBottom>Gestión de Calificaciones</Typography>
+      <Box sx={{ p: 4, bgcolor: theme.colors.background, color: theme.colors.text, minHeight: "100vh" }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold" color={theme.colors.primary}>
+          Gestión de Calificaciones
+        </Typography>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Grupo</InputLabel>
+          <InputLabel sx={{ color: theme.colors.text }}>Grupo</InputLabel>
           <Select
             value={selectedGroup ?? ""}
             onChange={(e) => setSelectedGroup(Number(e.target.value))}
-            sx={{ bgcolor: "#282828", color: "white" }}
+            sx={{ bgcolor: theme.colors.card, color: theme.colors.text }}
           >
             {groups.map((group) => (
               <MenuItem key={group.id} value={group.id}>
@@ -128,11 +131,11 @@ const GradesPage: React.FC = () => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Materia</InputLabel>
+          <InputLabel sx={{ color: theme.colors.text }}>Materia</InputLabel>
           <Select
             value={selectedSubject ?? ""}
             onChange={(e) => setSelectedSubject(Number(e.target.value))}
-            sx={{ bgcolor: "#282828", color: "white" }}
+            sx={{ bgcolor: theme.colors.card, color: theme.colors.text }}
           >
             {subjects.map((subject) => (
               <MenuItem key={subject.id} value={subject.id}>
@@ -143,11 +146,11 @@ const GradesPage: React.FC = () => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Parcial</InputLabel>
+          <InputLabel sx={{ color: theme.colors.text }}>Parcial</InputLabel>
           <Select
             value={selectedPartial ?? ""}
             onChange={(e) => setSelectedPartial(Number(e.target.value))}
-            sx={{ bgcolor: "#282828", color: "white" }}
+            sx={{ bgcolor: theme.colors.card, color: theme.colors.text }}
           >
             {partials.map((partial) => (
               <MenuItem key={partial} value={partial}>
@@ -157,37 +160,34 @@ const GradesPage: React.FC = () => {
           </Select>
         </FormControl>
 
-        <Box component={Paper} sx={{ mt: 3, maxHeight: 400, overflow: "auto", bgcolor: "#1E1E1E", p: 2 }}>
-          <Typography variant="h6" color="white">Lista de Calificaciones</Typography>
+        <Box component={Paper} sx={{ mt: 3, maxHeight: 400, overflow: "auto", bgcolor: theme.colors.card, p: 2 }}>
+          <Typography variant="h6" color={theme.colors.text}>Lista de Calificaciones</Typography>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: "white" }}>Matrícula</TableCell>
-                <TableCell sx={{ color: "white" }}>Nombre</TableCell>
-                <TableCell sx={{ color: "white" }}>Actividad 1</TableCell>
-                <TableCell sx={{ color: "white" }}>Actividad 2</TableCell>
-                <TableCell sx={{ color: "white" }}>Asistencia</TableCell>
-                <TableCell sx={{ color: "white" }}>Proyecto</TableCell>
-                <TableCell sx={{ color: "white" }}>Examen</TableCell>
-                <TableCell sx={{ color: "white" }}>Acción</TableCell>
+                {["Matrícula", "Nombre", "Actividad 1", "Actividad 2", "Asistencia", "Proyecto", "Examen", "Acción"].map((header) => (
+                  <TableCell key={header} sx={{ color: theme.colors.text }}>
+                    {header}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {grades.map((grade) => (
                 <TableRow key={grade.id}>
-                  <TableCell sx={{ color: "white" }}>{grade.matricula}</TableCell>
-                  <TableCell sx={{ color: "white" }}>{grade.name}</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>{grade.matricula}</TableCell>
+                  <TableCell sx={{ color: theme.colors.text }}>{grade.name}</TableCell>
                   {["activity_1", "activity_2", "attendance", "project", "exam"].map((field) => (
                     <TableCell key={field}>
                       <TextField
                         value={editedGrades[grade.id]?.[field] ?? grade[field]}
                         onChange={(e) => handleChange(grade.id, field, e.target.value)}
-                        sx={{ input: { color: "white" }, bgcolor: "#282828" }}
+                        sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.card }}
                       />
                     </TableCell>
                   ))}
                   <TableCell>
-                    <Button variant="contained" onClick={() => handleSave(grade.id)} sx={{ bgcolor: "#800080" }}>
+                    <Button variant="contained" onClick={() => handleSave(grade.id)} sx={{ bgcolor: theme.colors.primary }}>
                       Guardar
                     </Button>
                   </TableCell>

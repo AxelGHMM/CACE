@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import api from "../../utils/api";
 import DashELayout from "../Layout/DashELayout";
+import theme from "../../theme";
 
 const SubjectGroup: React.FC = () => {
   const [groupName, setGroupName] = useState("");
@@ -54,63 +55,65 @@ const SubjectGroup: React.FC = () => {
 
   return (
     <DashELayout>
-       <Box sx={{ p: 4, bgcolor: "#121212", color: "#ffffff", minHeight: "100vh" }}>
-       <Typography variant="h4" gutterBottom>Gestión de Materias y Grupos</Typography>
+      <Box sx={{ p: 4, bgcolor: theme.colors.background, color: theme.colors.text, minHeight: "100vh" }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold" color={theme.colors.primary}>
+          Gestión de Materias y Grupos
+        </Typography>
 
-{/* 🔹 Formulario para agregar grupos */}
-<Paper sx={{ p: 3, bgcolor: "#1E1E1E", mb: 3 }}>
-  <Typography variant="h6" color="white">Agregar Grupo</Typography>
-  <TextField
-    fullWidth
-    label="Nombre del Grupo"
-    variant="outlined"
-    sx={{ mt: 2, input: { color: "white" }, bgcolor: "#282828" }}
-    value={groupName}
-    onChange={(e) => setGroupName(e.target.value)}
-    InputLabelProps={{
-        style: { color: "white" }, // 🔹 Hace que el label sea blanco
-      }}
-  />
-  <Button
-    variant="contained"
-    sx={{ mt: 2, bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }}
-    onClick={handleAddGroup}
-  >
-    Guardar Grupo
-  </Button>
-</Paper>
+        {/* 🔹 Formulario para agregar grupos */}
+        <Paper sx={{ p: 3, bgcolor: theme.colors.card, mb: 3, borderRadius: "10px" }}>
+          <Typography variant="h6" color={theme.colors.primary}>
+            Agregar Grupo
+          </Typography>
+          <TextField
+            fullWidth
+            label="Nombre del Grupo"
+            variant="outlined"
+            sx={{ mt: 2, input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            InputLabelProps={{ style: { color: theme.colors.text } }}
+          />
+          <Button
+            variant="contained"
+            sx={{ mt: 2, bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }}
+            onClick={handleAddGroup}
+          >
+            Guardar Grupo
+          </Button>
+        </Paper>
 
-{/* 🔹 Formulario para agregar materias */}
-<Paper sx={{ p: 3, bgcolor: "#1E1E1E" }}>
-  <Typography variant="h6" color="white">Agregar Materia</Typography>
-  <TextField
-    fullWidth
-    label="Nombre de la Materia"
-    variant="outlined"
-    sx={{ mt: 2, input: { color: "white" }, bgcolor: "#282828" }}
-    value={subjectName}
-    onChange={(e) => setSubjectName(e.target.value)}
-      InputLabelProps={{
-      style: { color: "white" }, // 🔹 Hace que el label sea blanco
-    }}
-  />
-  <Button
-    variant="contained"
-    sx={{ mt: 2, bgcolor: "#800080", "&:hover": { bgcolor: "#4b0082" } }}
-    onClick={handleAddSubject}
-  >
-    Guardar Materia
-  </Button>
-</Paper>
+        {/* 🔹 Formulario para agregar materias */}
+        <Paper sx={{ p: 3, bgcolor: theme.colors.card, borderRadius: "10px" }}>
+          <Typography variant="h6" color={theme.colors.primary}>
+            Agregar Materia
+          </Typography>
+          <TextField
+            fullWidth
+            label="Nombre de la Materia"
+            variant="outlined"
+            sx={{ mt: 2, input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value)}
+            InputLabelProps={{ style: { color: theme.colors.text } }}
+          />
+          <Button
+            variant="contained"
+            sx={{ mt: 2, bgcolor: theme.colors.primary, "&:hover": { bgcolor: theme.colors.secondary } }}
+            onClick={handleAddSubject}
+          >
+            Guardar Materia
+          </Button>
+        </Paper>
 
-{/* 🔹 Mensajes de éxito/error */}
-<Snackbar open={Boolean(message.text)} autoHideDuration={3000} onClose={() => setMessage({ text: "", type: "success" })}>
-  <Alert severity={message.type === "error" ? "error" : "success"} sx={{ width: "100%" }}>
-    {message.text}
-  </Alert>
-</Snackbar>
-</Box>
-</DashELayout>
+        {/* 🔹 Mensajes de éxito/error */}
+        <Snackbar open={Boolean(message.text)} autoHideDuration={3000} onClose={() => setMessage({ text: "", type: "success" })}>
+          <Alert severity={message.type === "error" ? "error" : "success"} sx={{ width: "100%" }}>
+            {message.text}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </DashELayout>
   );
 };
 

@@ -18,7 +18,18 @@ SET default_table_access_method = heap;
 -- Establecer el esquema por defecto
 SET search_path TO public;
 
--- Tabla de Users (Profesores y Admins)
+-- 🔹 1️⃣ Crear primero las tablas base sin dependencias
+
+-- Tabla de Groups (Grupos) ✅
+CREATE TABLE public.groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Tabla de Users (Profesores y Admins) ✅
 CREATE TABLE public.users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -31,66 +42,65 @@ CREATE TABLE public.users (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Tabla de Students (Alumnos)
+-- Tabla de Subjects (Materias) ✅
+CREATE TABLE public.subjects (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- 🔹 2️⃣ Ahora crear las tablas que dependen de las anteriores
+
+-- Tabla de Students (Alumnos) ✅
 CREATE TABLE public.students (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100),
     matricula VARCHAR(50) NOT NULL UNIQUE,
-    group_id INTEGER NOT NULL REFERENCES public.groups(id),
+    group_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE CASCADE
 );
 
--- Tabla de Groups (Grupos)
-CREATE TABLE public.groups (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
-
--- Tabla de Subjects (Materias)
-CREATE TABLE public.subjects (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
-
--- Tabla de Assignments (Relación entre Users, Groups y Subjects)
+-- Tabla de Assignments (Relación entre Users, Groups y Subjects) ✅
 CREATE TABLE public.assignments (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES public.users(id),
-    group_id INTEGER NOT NULL REFERENCES public.groups(id),
-    subject_id INTEGER NOT NULL REFERENCES public.subjects(id),
+    user_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES public.subjects(id) ON DELETE CASCADE
 );
 
--- Tabla de Attendances (Asistencias)
+-- Tabla de Attendances (Asistencias) ✅
 CREATE TABLE public.attendances (
     id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
-    user_id INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    student_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     date DATE NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('present', 'absent', 'late')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
 );
 
--- Tabla de Grades (Calificaciones)
+-- Tabla de Grades (Calificaciones) ✅
 CREATE TABLE public.grades (
     id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES public.students(id),
-    professor_id INTEGER NOT NULL REFERENCES public.users(id),
-    subject_id INTEGER NOT NULL REFERENCES public.subjects(id),
+    student_id INTEGER NOT NULL,
+    professor_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
     partial INTEGER NOT NULL CHECK (partial BETWEEN 1 AND 3),
     activity_1 NUMERIC(5,2),
     activity_2 NUMERIC(5,2),
@@ -99,8 +109,13 @@ CREATE TABLE public.grades (
     exam NUMERIC(5,2),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE,
+    FOREIGN KEY (professor_id) REFERENCES public.users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES public.subjects(id) ON DELETE CASCADE
 );
+
+-- 🔹 3️⃣ Crear la función y triggers para actualizar `updated_at`
 
 -- Crear función update_timestamp()
 CREATE OR REPLACE FUNCTION update_timestamp()
