@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
 import groupModel from "../models/groupModel";
+import { validationResult } from "express-validator";
 
-// Obtener grupo por nombre
+// Obtener grupo por nombre con validación
 export const getGroupByName = async (req: Request, res: Response): Promise<void> => {
-  const { name } = req.params;
-
-  if (!name) {
-    res.status(400).json({ error: "El nombre del grupo es requerido" });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
     return;
   }
 
   try {
-    const group = await groupModel.getGroupByName(name);
+    const group = await groupModel.getGroupByName(req.params.name);
     if (!group) {
       res.status(404).json({ message: "Grupo no encontrado" });
       return;
@@ -34,17 +34,16 @@ export const getAllGroups = async (_req: Request, res: Response): Promise<void> 
   }
 };
 
-// Crear un nuevo grupo
+// Crear un nuevo grupo con validación
 export const createGroup = async (req: Request, res: Response): Promise<void> => {
-  const { name } = req.body;
-
-  if (!name) {
-    res.status(400).json({ error: "El nombre del grupo es requerido" });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
     return;
   }
 
   try {
-    const group = await groupModel.createGroup(name);
+    const group = await groupModel.createGroup(req.body.name);
     res.status(201).json(group);
   } catch (error) {
     console.error("Error al crear grupo:", error);

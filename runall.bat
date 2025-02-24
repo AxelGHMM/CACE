@@ -13,3 +13,4 @@ cd ..
 
 echo Todos los servicios han sido iniciados.
 pause
+s

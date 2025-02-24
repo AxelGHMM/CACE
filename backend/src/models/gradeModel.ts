@@ -26,13 +26,7 @@ const createGradesForStudent = async (studentId: number, groupId: number): Promi
     const checkResult = await pool.query(queryCheck, [studentId, groupId]);
     const existingCount = parseInt(checkResult.rows[0].count);
 
-    // Si ya existen 3 registros, no inserta nada
-    if (existingCount >= 3) {
-      console.log(`🔍 El estudiante ${studentId} ya tiene sus calificaciones registradas.`);
-      return;
-    }
-
-    console.log(`✅ Creando calificaciones para el estudiante ${studentId}`);
+    if (existingCount >= 3) return;
 
     const queryInsert = `
       INSERT INTO grades (student_id, professor_id, subject_id, partial, activity_1, activity_2, attendance, project, exam, is_active)
@@ -45,15 +39,12 @@ const createGradesForStudent = async (studentId: number, groupId: number): Promi
 
     await pool.query(queryInsert, [studentId, groupId]);
   } catch (error) {
-    console.error(`❌ Error al crear registros en grades para estudiante ${studentId}:`, error);
+    console.error(`Error al crear registros en grades para estudiante ${studentId}:`, error);
   }
 };
 
-
 // 🔹 Obtener calificaciones por grupo y materia
 const getGradesByGroupAndSubject = async (groupId: number, subjectId: number, partial: number | null): Promise<Grade[]> => {
-  console.log("🔹 Ejecutando consulta SQL con:", { groupId, subjectId, partial });
-
   const query = `
     SELECT g.id, s.matricula, s.name, g.partial, g.activity_1, g.activity_2, g.attendance, g.project, g.exam
     FROM grades g
@@ -66,11 +57,8 @@ const getGradesByGroupAndSubject = async (groupId: number, subjectId: number, pa
 
   const values = partial ? [groupId, subjectId, partial] : [groupId, subjectId];
   const result = await pool.query(query, values);
-  
-  console.log("📌 Resultados de la consulta:", result.rows);
   return result.rows;
 };
-
 
 // 🔹 Obtener calificaciones de todos los grupos y materias de un profesor
 const getGradesByProfessor = async (professorId: number): Promise<Grade[]> => {

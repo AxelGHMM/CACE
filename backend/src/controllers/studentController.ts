@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
 import studentModel from "../models/studentModel";
+import { validationResult } from "express-validator";
 
 // Obtener estudiante por matrícula
 export const getStudentByMatricula = async (req: Request, res: Response): Promise<void> => {
-  const { matricula } = req.params;
-
-  if (!matricula) {
-    res.status(400).json({ error: "La matrícula es requerida" });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
     return;
   }
 
   try {
-    const student = await studentModel.getStudentByMatricula(matricula);
+    const student = await studentModel.getStudentByMatricula(req.params.matricula);
     if (!student) {
       res.status(404).json({ message: "Estudiante no encontrado" });
       return;
@@ -25,15 +25,14 @@ export const getStudentByMatricula = async (req: Request, res: Response): Promis
 
 // Obtener estudiantes por grupo
 export const getStudentsByGroup = async (req: Request, res: Response): Promise<void> => {
-  const { groupId } = req.params;
-
-  if (!groupId || isNaN(parseInt(groupId))) {
-    res.status(400).json({ error: "El ID del grupo es requerido y debe ser un número válido" });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
     return;
   }
 
   try {
-    const students = await studentModel.getStudentsByGroup(parseInt(groupId));
+    const students = await studentModel.getStudentsByGroup(parseInt(req.params.groupId));
     if (students.length === 0) {
       res.status(404).json({ message: "No se encontraron estudiantes para este grupo" });
       return;

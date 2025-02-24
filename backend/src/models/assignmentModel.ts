@@ -8,6 +8,7 @@ interface Assignment {
   is_active?: boolean;
 }
 
+// 🔹 Obtener asignaciones de un usuario
 const getAssignmentsByUserId = async (userId: number): Promise<Assignment[]> => {
   const query = `
     SELECT 
@@ -26,13 +27,14 @@ const getAssignmentsByUserId = async (userId: number): Promise<Assignment[]> => 
   return result.rows;
 };
 
-
+// 🔹 Obtener una asignación por ID
 const getAssignmentById = async (id: number): Promise<Assignment | undefined> => {
   const query = `SELECT * FROM assignments WHERE id = $1 AND is_active = true;`;
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
 
+// 🔹 Crear una nueva asignación
 const createAssignment = async (assignment: Assignment): Promise<Assignment> => {
   const query = `
     INSERT INTO assignments (user_id, group_id, subject_id, is_active)
@@ -44,6 +46,7 @@ const createAssignment = async (assignment: Assignment): Promise<Assignment> => 
   return result.rows[0];
 };
 
+// 🔹 Actualizar una asignación
 const updateAssignment = async (id: number, assignment: Partial<Assignment>): Promise<Assignment | undefined> => {
   const query = `
     UPDATE assignments
@@ -59,6 +62,7 @@ const updateAssignment = async (id: number, assignment: Partial<Assignment>): Pr
   return result.rows[0];
 };
 
+// 🔹 Eliminar una asignación (eliminación lógica)
 const deleteAssignment = async (id: number): Promise<void> => {
   const query = `UPDATE assignments SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1;`;
   await pool.query(query, [id]);

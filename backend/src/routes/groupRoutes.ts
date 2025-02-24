@@ -1,16 +1,17 @@
 import { Router } from "express";
 import * as groupController from "../controllers/groupController";
 import { verifyToken } from "../middleware/authMiddleware";
+import { param, body } from "express-validator";
 
 const router = Router();
 
-// Ruta para obtener un grupo por nombre
-router.get("/:name", verifyToken, groupController.getGroupByName);
+// 🔹 Validaciones
+const validateGroupName = [param("name").notEmpty().withMessage("El nombre del grupo es requerido")];
+const validateNewGroup = [body("name").notEmpty().withMessage("El nombre del grupo es requerido")];
 
-// Ruta para obtener todos los grupos
+// 🔹 Rutas protegidas con token y validaciones
+router.get("/:name", verifyToken, validateGroupName, groupController.getGroupByName);
 router.get("/", verifyToken, groupController.getAllGroups);
-
-// **Nueva ruta para crear un grupo**
-router.post("/", verifyToken, groupController.createGroup);
+router.post("/", verifyToken, validateNewGroup, groupController.createGroup);
 
 export default router;

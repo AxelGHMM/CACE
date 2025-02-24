@@ -3,6 +3,7 @@ import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Drawer, 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import MenuIcon from "@mui/icons-material/Menu";
+import theme from "../../theme"; // ✅ Importamos el nuevo tema
 
 const adminSidebarItems = [
   { label: "Inicio", route: "/dashE" },
@@ -11,7 +12,7 @@ const adminSidebarItems = [
   { label: "Materias y Grupos", route: "/dashE/subjects-groups" },
 ];
 
-const drawerWidth = 250; // Ancho fijo del sidebar
+const drawerWidth = 250;
 
 const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -19,23 +20,19 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Si el usuario no es admin, redirigir al inicio
   if (!user || user.role !== "admin") {
     navigate("/");
     return null;
   }
 
   const isActiveTab = (route: string) => location.pathname === route;
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const drawerContent = (
     <Box
       sx={{
         width: drawerWidth,
-        bgcolor: "#2B2C28", // 🔳 Gris oscuro elegante
+        bgcolor: theme.colors.sidebar,
         p: 2,
         height: "95%",
         display: "flex",
@@ -53,8 +50,8 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <ListItemButton
               onClick={() => navigate(route)}
               sx={{
-                bgcolor: isActiveTab(route) ? "#08DC2B" : "transparent", // 🟢 Verde brillante cuando está seleccionado
-                "&:hover": { bgcolor: "#27AE60" }, // 🟢 Verde más oscuro al pasar el cursor
+                bgcolor: isActiveTab(route) ? theme.colors.primary : "transparent",
+                "&:hover": { bgcolor: theme.colors.sidebarHover },
                 borderRadius: "8px",
                 padding: "10px",
               }}
@@ -62,10 +59,10 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <ListItemText 
                 primary={label} 
                 sx={{ 
-                  color: isActiveTab(route) ? "#131515" : "#08DC2B", // 🟢 Texto verde en opciones no seleccionadas, negro en seleccionadas
+                  color: isActiveTab(route) ? "#131515" : "#FFFFFF",
                   fontSize: "1rem", 
                   fontWeight: "bold",
-                  textTransform: "uppercase" // 🔹 Resaltar opciones
+                  textTransform: "uppercase"
                 }} 
               />
             </ListItemButton>
@@ -73,19 +70,18 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         ))}
       </List>
 
-      {/* 🔹 Botón "Cerrar Sesión" con fondo negro grisáceo */}
       <Button
         onClick={logout}
         sx={{
-          bgcolor: "#131515", // 🔳 Negro grisáceo para el botón
-          "&:hover": { bgcolor: "#2B2C28" }, // 🔳 Gris oscuro al hacer hover
+          bgcolor: "#131515",
+          "&:hover": { bgcolor: "#2B2C28" },
           borderRadius: "8px",
           color: "white",
           fontWeight: "bold",
           fontSize: "1rem",
           padding: "12px",
           textTransform: "none",
-          border: "2px solid #08DC2B", // 🟢 Borde verde brillante
+          border: `2px solid ${theme.colors.primary}`,
         }}
         fullWidth
       >
@@ -96,7 +92,6 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar fijo en pantallas grandes */}
       <Box
         sx={{
           width: drawerWidth,
@@ -110,7 +105,6 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {drawerContent}
       </Box>
 
-      {/* Sidebar deslizante en móviles */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -118,15 +112,13 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { width: drawerWidth, bgcolor: "#2B2C28" }, // 🔳 Sidebar gris en móvil
+          "& .MuiDrawer-paper": { width: drawerWidth, bgcolor: theme.colors.sidebar },
         }}
       >
         {drawerContent}
       </Drawer>
 
-      {/* Contenido principal con margen */}
-      <Box sx={{ flexGrow: 1, p: 3, ml: { xs: 0, md: `${drawerWidth}px` }, mr: { xs: 0, md: 0 }, bgcolor: "#FFFAFB" }}>
-        {/* Botón para abrir el sidebar en móviles */}
+      <Box sx={{ flexGrow: 1, p: 3, ml: { xs: 0, md: `${drawerWidth}px` }, bgcolor: theme.colors.background }}>
         <IconButton
           onClick={handleDrawerToggle}
           sx={{
@@ -147,3 +139,4 @@ const DashELayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default DashELayout;
+
