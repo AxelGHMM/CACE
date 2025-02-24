@@ -1,26 +1,25 @@
-# Etapa 1: Construcción de la aplicación
+# Usa una imagen base de Node para construir el frontend
 FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Instalar dependencias
+# Copia archivos y ejecuta la instalación
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copiar el resto del código fuente
+# Copia el código fuente y construye la aplicación
 COPY . .
-
-# Construir la aplicación
 RUN npm run build
 
-# Etapa 2: Servir la aplicación con Nginx
+# Usa Nginx para servir la aplicación
 FROM nginx:stable-alpine
 
-# Copiar la carpeta `dist` generada en la etapa anterior a Nginx
+# Copia la configuración de Nginx en la ubicación correcta
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+
+# Copia la aplicación al servidor Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Exponer el puerto 80
 EXPOSE 80
-
-# Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]

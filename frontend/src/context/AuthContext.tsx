@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { CircularProgress, Box } from "@mui/material";
+
 
 interface UserType {
   id: number;
@@ -74,7 +76,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Personaliza esto según tus necesidades
+    return(
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (

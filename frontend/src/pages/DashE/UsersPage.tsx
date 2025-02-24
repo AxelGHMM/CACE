@@ -22,19 +22,39 @@ import {
   Box,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import api from "../../utils/api";
 import DashELayout from "../Layout/DashELayout";
 import useAdminAuth from "../../hooks/useAdminAuth";
 import theme from "../../theme";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 const UsersPage = () => {
   const isAdmin = useAdminAuth();
-
   if (!isAdmin) return null;
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ id: "", name: "", email: "", role: "", password: "" });
+  const [formData, setFormData] = useState<{ 
+    id: string | null; 
+    name: string; 
+    email: string; 
+    role: string; 
+    password: string; 
+  }>({
+    id: null,
+    name: "",
+    email: "",
+    role: "",
+    password: "",
+  });
+
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
@@ -53,8 +73,14 @@ const UsersPage = () => {
     }
   };
 
-  const handleOpen = (user = { name: "", email: "", role: "", password: "" }) => {
-    setFormData(user);
+  const handleOpen = (user: Partial<User> = {}) => {
+    setFormData({
+      id: user.id || null, 
+      name: user.name || "",
+      email: user.email || "",
+      role: user.role || "",
+      password: "", 
+    });
     setEditMode(!!user.id);
     setOpen(true);
   };
@@ -63,22 +89,25 @@ const UsersPage = () => {
     setOpen(false);
   };
 
-  const handleChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const { id, ...data } = formData;
+      const { id, password, ...data } = formData;
 
       if (editMode) {
-        delete data.password;
         await api.put(`/users/${id}`, data, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await api.post("/users/register", data, {
+        await api.post("/users/register", formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -89,7 +118,7 @@ const UsersPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar este usuario?")) {
       try {
         const token = sessionStorage.getItem("token");
@@ -158,7 +187,7 @@ const UsersPage = () => {
             name="name"
             label="Nombre"
             value={formData.name}
-            onChange={handleChange}
+            onChange={handleInputChange}
             InputLabelProps={{ style: { color: theme.colors.text } }}
             sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
           />
@@ -168,16 +197,16 @@ const UsersPage = () => {
             name="email"
             label="Email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={handleInputChange}
             InputLabelProps={{ style: { color: theme.colors.text } }}
             sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
           />
 
           <FormControl fullWidth margin="dense">
             <InputLabel sx={{ color: theme.colors.text }}>Rol</InputLabel>
-            <Select name="role" value={formData.role} onChange={handleChange} sx={{ color: theme.colors.text, bgcolor: theme.colors.background }}>
+            <Select name="role" value={formData.role} onChange={handleSelectChange} sx={{ color: theme.colors.text, bgcolor: theme.colors.background }}>
               <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="professor">Professor</MenuItem>
+              <MenuItem value="professor">Profesor</MenuItem>
             </Select>
           </FormControl>
 
@@ -189,7 +218,7 @@ const UsersPage = () => {
               label="Contraseña"
               type="password"
               value={formData.password}
-              onChange={handleChange}
+              onChange={handleInputChange}
               InputLabelProps={{ style: { color: theme.colors.text } }}
               sx={{ input: { color: theme.colors.text }, bgcolor: theme.colors.background }}
             />

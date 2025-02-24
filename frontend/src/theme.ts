@@ -4,6 +4,7 @@ const theme = {
       card: "#F4F3F2",
       dashboardBackground: "#08DC2B", // 🟢 Fondo verde solo para el Dashboard
       primary: "#08DC2B",
+      secondary: "#27AE60", // 🟢 Agregado para evitar errores
       error: "#C4493A",
       text: "#131515",
     },
